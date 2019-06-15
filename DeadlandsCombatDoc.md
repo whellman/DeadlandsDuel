@@ -3,9 +3,9 @@ In Deadlands, combat is made up of ~5 second rounds.
 Each `round` is made up of a number of `segments` determined by the quickness
 skill rolls of the combatants.
 
-#General procedure:
+# General procedure:
 
-##Step One: Pre-Round Set-Up
+## Step One: Pre-Round Set-Up
 If you might be surprised, make a **cognition** roll; *TN 5* if danger is expected, *TN 11* if not.
 
 If you make it, you are not surprised, and proceed normally.
@@ -21,7 +21,7 @@ Draw one card, plus one for each success and raise, up to a normal maximum of 5.
 If the deck runs out, reshuffle the discards immediately.
 If someone draws a Black Joker, reshuffle after the round is done.
 
-##Step Two: Beginning Of Round
+## Step Two: Beginning Of Round
 
 Count down card ranks starting from **Ace.** *(, King, Queen, Jack, 10, ... 3, 2)*
 
