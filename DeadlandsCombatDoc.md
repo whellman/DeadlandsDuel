@@ -13,10 +13,11 @@ If you make it, you are not surprised, and proceed normally.
 If you don't make it, you are surprised and get no cards/actions this round.
 You get actions next round, conditional on a *TN 5* **guts** roll at that time.
 
-Top of the round: roll quickness, TN 5.
+Cards will be drawn to order the actions. Two `action decks` are in use: The `Marshal` (*NPCs*), and the `Posse` (*PCs*).
 
-Two `action decks` are in use: The `Marshal` (*NPCs*), and the `Posse` (*PCs*).
-Draw one card, plus one for each success and raise, up to a normal maximum of 5.
+Begin by rolling **quickness,** *TN 5.*
+
+If you go bust, you get no cards this round. Otherwise, draw **one** card, **plus one for each** `success` and `raise`, *up to a normal maximum of 5.*
 
 If the deck runs out, reshuffle the discards immediately.
 If someone draws a Black Joker, reshuffle after the round is done.
