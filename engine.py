@@ -22,6 +22,9 @@ def main():
     message_width = screen_width - bar_width - 2
     message_height = panel_height - 1
 
+    cardtable_width = 16
+    cardtable_height = 
+
     map_width = 80
     map_height = 43
 
@@ -50,7 +53,7 @@ def main():
                     fighter=fighter_component, inventory=inventory_component)
 
     entities = [player]
-    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    libtcod.console_set_custom_font('cp437_10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
 
     libtcod.console_init_root(screen_width, screen_height, 'Deadlands Duel', False)
 

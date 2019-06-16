@@ -83,12 +83,12 @@ class GameMap:
 
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
-        for x in range(room.x1 + 1, room.x2):
-            for y in range(room.y1 + 1, room.y2):
+        for x in range(room.x1, room.x2):
+            for y in range(room.y1, room.y2):
                 self.tiles[x][y].blocked = True
                 self.tiles[x][y].block_sight = True
-        for x in range(room.x1 + 2, room.x2 - 1):
-            for y in range(room.y1 + 2, room.y2 - 1):
+        for x in range(room.x1 + 1, room.x2 - 1):
+            for y in range(room.y1 + 1, room.y2 - 1):
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
 
@@ -109,8 +109,8 @@ class GameMap:
 
         for i in range(number_of_monsters):
             # Choose a random location in the room
-            x = randint(room.x1 + 1, room.x2 - 1)
-            y = randint(room.y1 + 1, room.y2 - 1)
+            x = randint(room.x1 + 2, room.x2 - 2)
+            y = randint(room.y1 + 2, room.y2 - 2)
 
             if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                 if randint(0, 100) < 80:
