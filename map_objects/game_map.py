@@ -18,12 +18,12 @@ class GameMap:
         self.tiles = self.initialize_tiles()
 
     def initialize_tiles(self):
-        tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
+        tiles = [[Tile(False) for y in range(self.height)] for x in range(self.width)]
         return tiles
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities,
                  max_monsters_per_room, max_items_per_room):
-        # Create two rooms for demonstration purposes
+
         rooms = []
         num_rooms = 0
 
@@ -85,6 +85,10 @@ class GameMap:
         # go through the tiles in the rectangle and make them passable
         for x in range(room.x1 + 1, room.x2):
             for y in range(room.y1 + 1, room.y2):
+                self.tiles[x][y].blocked = True
+                self.tiles[x][y].block_sight = True
+        for x in range(room.x1 + 2, room.x2 - 1):
+            for y in range(room.y1 + 2, room.y2 - 1):
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
 

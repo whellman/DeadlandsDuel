@@ -31,7 +31,7 @@ def main():
 
     fov_algorithm = 1
     fov_light_walls = True
-    fov_radius = 10
+    fov_radius = 100
 
     max_monsters_per_room = 3
     max_items_per_room = 5
