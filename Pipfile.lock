@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b57d0fa546e29356b99dc6a44678624929440d9b8384d832726a3efc51a01891"
+            "sha256": "2d6381936f4da52f667f8ac211c5e6bece25817499cfffd5852e0472ab521bfb"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -82,6 +82,13 @@
                 "sha256:a988718abfad80b6b157acce7bf130a30876d27603738ac39f140993246b25b3"
             ],
             "version": "==2.19"
+        },
+        "pydealer": {
+            "hashes": [
+                "sha256:44bc46baef18bf33f884840eda2098c4741e662e9efe95449aed07c553d81dcf"
+            ],
+            "index": "pypi",
+            "version": "==1.4.0"
         },
         "tcod": {
             "hashes": [
