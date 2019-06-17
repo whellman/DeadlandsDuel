@@ -1,5 +1,5 @@
 import tcod
-import tcod.event as event
+import tcod.event
 
 from renderengine import render_all
 from mapgine import generate_map
@@ -13,7 +13,7 @@ def main():
     map_width = screen_width - cardtable_width
     map_height = screen_height
 
-    # FIXME: JUst started this. number_of_rooms = 8
+    number_of_rooms = 8
 
     mapcon = tcod.console.Console(map_width, map_height)
     cardtable = tcod.console.Console(cardtable_width, cardtable_height)
@@ -28,19 +28,7 @@ def main():
 
     while True:
 
-        for y in range(mapcon.height):
-            for x in range(mapcon.width):
-                if game_map.walkable[y,x]:
-                    mapcon.print(x, y, ' ', bg=[200, 170, 90])
-                else:
-                    mapcon.print(x, y, ' ', bg=[80, 60, 20])
-
-
-
-        mapcon.blit(root_console, 0, 0, 0, 0, mapcon.width, mapcon.height)
-
-
-        render_all(root_console, cardtable, cardtable_x)
+        render_all(root_console, mapcon, game_map, cardtable, cardtable_x)
         tcod.console_flush()
 
 
