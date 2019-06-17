@@ -2,7 +2,7 @@ import tcod
 import tcod.event
 
 from input_handler import handle_events
-from mapgine import generate_map
+from map_objects.mapgine import generate_map
 from renderengine import render_all
 
 
@@ -31,6 +31,8 @@ def main():
     root_console = tcod.console_init_root(screen_width, screen_height, 'Deadlands Duel', False, tcod.RENDERER_SDL2, vsync=True)
 
     while True:
+
+        game_map.compute_fov(player_x, player_y, radius=8)
 
         render_all(root_console, mapcon, game_map, cardtable, cardtable_x)
 

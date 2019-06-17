@@ -3,10 +3,16 @@ import tcod
 def render_map(mapcon, game_map):
     for y in range(mapcon.height):
         for x in range(mapcon.width):
-            if game_map.walkable[y,x]:
-                mapcon.print(x, y, ' ', bg=[200, 170, 90])
+            if game_map.fov[y,x]:
+                if game_map.walkable[y,x]:
+                    mapcon.print(x, y, ' ', bg=[200, 170, 90])
+                else:
+                    mapcon.print(x, y, ' ', bg=[80, 60, 20])
             else:
-                mapcon.print(x, y, ' ', bg=[80, 60, 20])
+                if game_map.walkable[y,x]:
+                    mapcon.print(x, y, ' ', bg=[0, 0, 90])
+                else:
+                    mapcon.print(x, y, ' ', bg=[0, 0, 20])
 
 def render_cardtable(cardtable):
     cardtable.draw_rect(0, 0, cardtable.width, cardtable.height, ch=0, bg=(70, 140, 0))
