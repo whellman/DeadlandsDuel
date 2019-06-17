@@ -34,7 +34,18 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER,
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+def render_cardtable(cardtable, cardtable_width, cardtable_height, hand=None, chips=None, sleeve=None):
+    #libtcod.console_set_default_background(cardtable, libtcod.Color(50, 100, 0))
+    #libtcod.console_set_default_foreground(cardtable, libtcod.Color(70, 140, 0))
+    for y in range(cardtable_height):
+        for x in range(cardtable_width):
+            libtcod.console_set_char_background(cardtable, x, y, libtcod.Color(50, 100, 0))
+    # libtcod.console_rect(cardtable, 0, 0, cardtable_width, cardtable_height, False)
+    libtcod.console_set_default_background(cardtable, libtcod.Color(70, 140, 0))
+    libtcod.console_rect(cardtable, 0, 0, cardtable_width, cardtable_height, False)
+
+
+def render_all(con, panel, cardtable, cardtable_x, cardtable_width, cardtable_height, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
                bar_width, panel_height, panel_y, mouse, colors, game_state):
 
     if fov_recompute:
@@ -86,6 +97,12 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                              get_names_under_mouse(mouse, entities, fov_map))
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
+
+    render_cardtable(cardtable, cardtable_width, cardtable_height)
+
+    libtcod.console_set_default_background(cardtable, libtcod.Color(50, 100, 0))
+
+    libtcod.console_blit(cardtable, 0, 0, cardtable_width, cardtable_height, 0, cardtable_x, 0)
 
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         if game_state == GameStates.SHOW_INVENTORY:
