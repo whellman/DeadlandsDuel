@@ -20,18 +20,27 @@ def main():
 
     game_map = tcod.map.Map(map_width, map_height)
     generate_map(game_map, map_width, map_height)
-    print(game_map.walkable)
-    print(game_map.transparent)
+    # print(game_map.walkable)
+    # print(game_map.transparent)
     game_map.compute_fov(0, 0)
-    print(game_map.fov)
-
+    # print(game_map.fov)
+    print(game_map.walkable.shape)
 
     tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_ASCII_INROW)
     root_console = tcod.console_init_root(screen_width, screen_height, 'Deadlands Duel', False, tcod.RENDERER_SDL2, vsync=True)
 
     while True:
 
+        for y in range(map_height):
+            for x in range(map_width):
+                if game_map.walkable[y,x]:
+                    mapcon.print(x, y, ' ', bg=[200, 170, 90])
+                else:
+                    mapcon.print(x, y, ' ', bg=[80, 60, 20])
 
+
+
+        mapcon.blit(root_console, 0, 0, 0, 0, map_width, map_height)
 
 
         render_all(root_console, cardtable, cardtable_x, cardtable_width, cardtable_height)
@@ -41,11 +50,11 @@ def main():
         for event in tcod.event.wait():
             if (event.type == "QUIT"):
                 raise SystemExit()
-            elif (event.type == "KEYDOWN") and (event.sym == 27):
+            elif (event.type == "KEYDOWN"):
+                if (event.sym == 27):
+                    raise SystemExit()
+                # elif (event.sym == 'h')
                 # print(event.scancode)
                 # print(event.sym)
-                raise SystemExit()
-
-
 if __name__ == '__main__':
     main()
