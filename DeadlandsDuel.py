@@ -49,8 +49,9 @@ def main():
             newx = player_x + dx
             newy = player_y + dy
             if not ((newx < 0) or (newy < 0) or (newx >= map_width) or (newy >= map_height)):
-                player_x = newx
-                player_y = newy
+                if game_map.walkable[newy, newx]:
+                    player_x = newx
+                    player_y = newy
 
 if __name__ == '__main__':
     main()
