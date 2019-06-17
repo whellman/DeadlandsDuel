@@ -1,11 +1,12 @@
 import tcod
 
-def generate_map(game_map, map_width, map_height):
+def generate_map(game_map, number_of_rooms):
 
     # Our shootout happens outdoors. Outdoors is fully walkable and fully transparent.
 
     game_map.walkable[:] = True
     game_map.transparent[:] = True
 
-    # for y in range(map_height):
-    #     for x in range(map_width):
+    # for y in range(game_map.height):
+    #     for x in range(game_map.width):
+    #
