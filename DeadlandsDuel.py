@@ -9,8 +9,8 @@ def main():
     map_width = screen_width - cardtable_width
     map_height = screen_height
 
-    mapcon = tcod.console_new(map_width, map_height)
-    cardtable = tcod.console_new(cardtable_width, cardtable_height)
+    mapcon = tcod.console.Console(map_width, map_height)
+    cardtable = tcod.console.Console(cardtable_width, cardtable_height)
 
 
     tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_ASCII_INROW)
