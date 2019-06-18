@@ -38,12 +38,12 @@ def main():
     fate_pot = Counter({'white': 50, 'red': 25, 'blue':10})
 
     print(fate_pot)
-    grabtest = sample(list(fate_pot.elements()), 3)
-    print(grabtest)
-    fate_pot.subtract(grabtest)
+    player_fate = Counter()
+    player_fate.update(sample(list(fate_pot.elements()), 3))
+    print(player_fate)
+    fate_pot.subtract(player_fate)
     print(fate_pot)
-    fate_pot += Counter(grabtest)
-    print(fate_pot)
+
 
     # FIXME: Currently, this does not include Jokers, which are required
     #        for decks used in Deadlands. The class can be instantiated to
@@ -53,8 +53,13 @@ def main():
     marshal_deck = pydealer.Deck()
     posse_deck = pydealer.Deck()
 
-    player_hand = pydealer.Stack()
+    marshal_deck.shuffle()
+    posse_deck.shuffle()
+
+    player_hand = posse_deck.deal(5) # pydealer.Stack()
     marshal_hand = pydealer.Stack()
+
+    player_hand.sort()
 
     player_discard = pydealer.Stack()
     marshal_discard = pydealer.Stack()
@@ -67,13 +72,26 @@ def main():
         if fov_recompute:
             game_map.compute_fov(player.x, player.y, algorithm=tcod.FOV_PERMISSIVE(5))
 
-        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x)
+        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, player_fate)
 
         tcod.console_flush()
 
         action = handle_events()
 
         move = action.get('move')
+
+        testhand = action.get('testhand')
+
+        if testhand:
+            if testhand == 1:
+                if player_hand.size < 5:
+                    newcard = posse_deck.deal(1)
+                    player_hand.add(newcard)
+                    player_hand.sort()
+            if testhand == -1:
+                if player_hand.size > 0:
+                    player_hand.deal(1, 'top')
+                    player_hand.sort()
 
         if move:
             dx, dy = move
@@ -87,16 +105,16 @@ def main():
 
             destination_x = player.x + dx
             destination_y = player.y + dy
+            if (0 <= destination_x < game_map.width) and (0 <= destination_y < game_map.height):
+                if game_map.walkable[destination_y, destination_x]:
+                    target = get_blocking_entities_at_location(entities, destination_x, destination_y)
 
-            if game_map.walkable[destination_y, destination_x]:
-                target = get_blocking_entities_at_location(entities, destination_x, destination_y)
+                    if target:
+                        print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
+                    else:
+                        player.move(dx, dy)
 
-                if target:
-                    print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
-                else:
-                    player.move(dx, dy)
-
-                    fov_recompute = True
+                        fov_recompute = True
 
 
 if __name__ == '__main__':

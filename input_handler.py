@@ -18,4 +18,8 @@ def handle_events():
             elif event.sym == tcod.event.K_DOWN:
                 return {'move': (0, 1)}
 
+            elif event.sym == tcod.event.K_c:
+                return {'testhand': 1}
+            elif event.sym == tcod.event.K_v:
+                return {'testhand': -1}
     return {}
