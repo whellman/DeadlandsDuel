@@ -11,9 +11,7 @@ def generate_map(game_map, player, entities):
     game_map.walkable[:] = True
     game_map.transparent[:] = True
 
-    # for y in range(game_map.height):
-    #     for x in range(game_map.width):
-    #
+
     bsp = tcod.bsp.BSP(x=1, y=1, width=game_map.width - 3, height=game_map.height - 3)
     bsp.split_recursive(
         depth=4,

@@ -3,6 +3,9 @@ import tcod.event
 
 import pydealer
 
+from collections import Counter
+from random import sample
+
 from entity import Entity, get_blocking_entities_at_location
 from input_handler import handle_events
 from map_objects.mapgine import generate_map
@@ -31,6 +34,26 @@ def main():
 
     fov_recompute = True
 
+
+    fate_pot = Counter({'white': 50, 'red': 25, 'blue':10})
+
+    print(fate_pot)
+    grabtest = sample(list(fate_pot.elements()), 3)
+    print(grabtest)
+
+    # FIXME: Currently, this does not include Jokers, which are required
+    #        for decks used in Deadlands. The class can be instantiated to
+    #        use jokers, but its use of jokers does not differentiate between
+    #        red and black jokers (as required in Deadlands) so the issue of
+    #        jokers is left to another day.
+    marshal_deck = pydealer.Deck()
+    posse_deck = pydealer.Deck()
+
+    player_hand = pydealer.Stack()
+    marshal_hand = pydealer.Stack()
+
+    player_discard = pydealer.Stack()
+    marshal_discard = pydealer.Stack()
 
     tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_ASCII_INROW)
     root_console = tcod.console_init_root(screen_width, screen_height, 'Deadlands Duel', False, tcod.RENDERER_SDL2, vsync=True)
