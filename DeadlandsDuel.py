@@ -6,6 +6,7 @@ import pydealer
 from collections import Counter
 from random import sample
 
+from diceroller import skill_roll
 from entity import Entity, get_blocking_entities_at_location
 from input_handler import handle_events
 from map_objects.mapgine import generate_map
@@ -25,6 +26,9 @@ def main():
     mapcon = tcod.console.Console(map_width, map_height)
     cardtable = tcod.console.Console(cardtable_width, cardtable_height)
 
+    # number of dice, sideness of dice. values used taken from gunslinger pregen, pg88
+    player_quickness = {'level': 2,
+                        'trait': 12}
 
     player = Entity(int(screen_width / 2), int(screen_height / 2), '@', tcod.white, 'Player', True)
     entities = [player]
@@ -61,7 +65,7 @@ def main():
 
     player_hand.sort()
 
-    player_discard = pydealer.Stack()
+    posse_discard = pydealer.Stack()
     marshal_discard = pydealer.Stack()
 
     tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_CP437)
@@ -85,13 +89,51 @@ def main():
         if testhand:
             if testhand == 1:
                 if player_hand.size < 5:
+                    if posse_deck.size == 0:
+                        print("reshuffling! posse_deck, posse_discard")
+                        print(posse_deck.size)
+                        print(posse_discard.size)
+                        print(player_hand.size + posse_deck.size + posse_discard.size)
+                        posse_deck.add(posse_discard.deal(posse_discard.size))
+                        posse_deck.shuffle()
                     newcard = posse_deck.deal(1)
                     player_hand.add(newcard)
                     player_hand.sort()
             if testhand == -1:
                 if player_hand.size > 0:
-                    player_hand.deal(1, 'top')
+                    posse_discard.add(player_hand.deal(1, 'top'))
                     player_hand.sort()
+                else:
+                    quickness_roll = skill_roll(player_quickness['trait'], player_quickness['level'])
+                    print('Beginning of new round. Rolling quickness...')
+                    bust = quickness_roll.get('bust')
+                    failure = quickness_roll.get('failure')
+                    success = quickness_roll.get('success')
+
+                    if not bust:
+                        handsize = 1
+                        if success:
+                            print("You succeeded in quickly getting multiple action cards this round!")
+                            handsize += success
+                        else:
+                            print("You failed to get more than the default single action card this round.")
+                        newhand = pydealer.Stack()
+
+                        for i in range(handsize):
+                            if posse_deck.size == 0:
+                                print("reshuffling!")
+                                print(posse_deck.size)
+                                print(posse_discard.size)
+                                print(newhand.size)
+                                posse_deck.add(posse_discard.deal(posse_discard.size))
+                                posse_deck.shuffle()
+                            newcard = posse_deck.deal(1)
+                            newhand.add(newcard)
+
+                        player_hand.add(newhand)
+                        player_hand.sort()
+                    else:
+                        print("You went bust, no new cards this round!")
 
         if move:
             dx, dy = move
