@@ -32,7 +32,7 @@ def main():
 
     while True:
 
-        game_map.compute_fov(player_x, player_y, radius=8)
+        game_map.compute_fov(player_x, player_y)#, algorithm=tcod.FOV_SHADOW)
 
         render_all(root_console, mapcon, game_map, cardtable, cardtable_x)
 
