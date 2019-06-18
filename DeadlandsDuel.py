@@ -40,6 +40,10 @@ def main():
     print(fate_pot)
     grabtest = sample(list(fate_pot.elements()), 3)
     print(grabtest)
+    fate_pot.subtract(grabtest)
+    print(fate_pot)
+    fate_pot += Counter(grabtest)
+    print(fate_pot)
 
     # FIXME: Currently, this does not include Jokers, which are required
     #        for decks used in Deadlands. The class can be instantiated to
@@ -55,7 +59,7 @@ def main():
     player_discard = pydealer.Stack()
     marshal_discard = pydealer.Stack()
 
-    tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_ASCII_INROW)
+    tcod.console_set_custom_font('cp437_10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_CP437)
     root_console = tcod.console_init_root(screen_width, screen_height, 'Deadlands Duel', False, tcod.RENDERER_SDL2, vsync=True)
 
     while True:
