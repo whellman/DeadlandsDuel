@@ -29,6 +29,7 @@ def main():
     # number of dice, sideness of dice. values used taken from gunslinger pregen, pg88
     player_quickness = {'level': 2,
                         'trait': 12}
+    player_pace
 
     player = Entity(int(screen_width / 2), int(screen_height / 2), '@', tcod.white, 'Player', True)
     entities = [player]
