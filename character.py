@@ -1,10 +1,6 @@
 import pydealer
 
-class Trait:
-
-    def __init__(self, levelDice = 1, traitDie = 4):
-        self.levelDice = levelDice
-        self.traitDie = trait
+from trait import Trait
 
 class Character:
 
@@ -23,11 +19,38 @@ class Character:
         self.spirit = traits['spirit']
 
         self.grit = 0
-        self.pace = nimbleness.traitDie
+        self.pace = self.nimbleness.traitDie
         self.size = 6
-        self.wind = vigor.traitDie + spirit.traitDie
-
+        self.wind = self.vigor.traitDie + self.spirit.traitDie
+        # FIXME: Below this point isn't __repr__'d.
         self.aptitudePoints = self.cognition.traitDie + self.knowledge.traitDie + self.smarts.traitDie
+
+        self.shootin_pistol = {'aptitude': 2,
+                                'trait': self.deftness.traitDie}
+
+    def __repr__(self):
+        return str({'deftness': self.deftness,
+                    'nimbleness': self.nimbleness,
+                    'quickness': self.quickness,
+                    'strength': self.strength,
+                    'vigor': self.vigor,
+                    'cognition': self.cognition,
+                    'knowledge': self.knowledge,
+                    'mien': self.mien,
+                    'smarts': self.smarts,
+                    'spirit': self.spirit,
+                    'grit': self.grit,
+                    'pace': self.pace,
+                    'size': self.size,
+                    'wind': self.wind})
+
+    # A player can move twice their Pace, in Yards, per round. One yard is three feet.
+    # We're assuming a standard D&D-style 5 feet per map square,
+    # and not really worrying about diagonals yet (if at all).
+
+    def get_movement_budget(self):
+        #        pace.    run   y->f  f->squares
+        return ((self.pace * 2) * 3) // 5
 
 def character_generator():
 

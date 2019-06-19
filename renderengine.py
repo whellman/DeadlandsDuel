@@ -54,7 +54,7 @@ def render_card(cardtable, card, x, y, bgcolor):
         cardtable.print(x + 2, y + 4, card.value[0], fg=fgcolor)
 
 
-def render_cardtable(cardtable, player_hand, player_fate):
+def render_cardtable(cardtable, player_hand, active_card, player_fate):
     cardtable.draw_rect(0, 0, cardtable.width, cardtable.height, ch=20, bg=rgb(70, 140, 0))
     cardtable.draw_rect(1, 1, cardtable.width-2, cardtable.height-2, ch=20, bg=rgb(30, 60, 0))
     cardtable.draw_rect(2, 2, cardtable.width-3, cardtable.height-3, ch=20, bg=rgb(50, 100, 0))
@@ -63,7 +63,10 @@ def render_cardtable(cardtable, player_hand, player_fate):
     startingshade = 255 - (stepamount * (player_hand.size - 1))
 
     for i in range(player_hand.size):
-        render_card(cardtable, player_hand[i], (3 + (2 * i)), 3, [(startingshade + (stepamount * i)), (startingshade + (stepamount * i)), (startingshade + (stepamount * i))])
+        render_card(cardtable, player_hand[i], (3 + (2 * i)), 7, [(startingshade + (stepamount * i)), (startingshade + (stepamount * i)), (startingshade + (stepamount * i))])
+
+    if active_card.size > 0:
+        render_card(cardtable, active_card[0], 3, 3, [255, 255, 230])
 
     chip_x = 3
     chip_y = cardtable.height - 2
@@ -73,8 +76,8 @@ def render_cardtable(cardtable, player_hand, player_fate):
         chip_x += 3
 
 
-def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, player_fate):
-    render_cardtable(cardtable, player_hand, player_fate)
+def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate):
+    render_cardtable(cardtable, player_hand, active_card, player_fate)
     cardtable.blit(root_console, cardtable_x, 0, 0, 0, cardtable.width, cardtable.height)
     render_map(mapcon, game_map)
     for entity in entities:

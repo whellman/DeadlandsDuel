@@ -23,8 +23,7 @@ def skill_roll(sideness_of_dice, number_of_dice = 1, tn = 5):
         evalResult = (onesCount >= (number_of_dice/2))
     else:
         evalResult = (onesCount > (number_of_dice/2))
-    print("raw biggest " + str(biggest))
-    print("raw onesCount " + str(onesCount))
+
     if(evalResult):
         return {'bust': 1}
     elif biggest < tn:
