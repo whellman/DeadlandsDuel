@@ -14,6 +14,8 @@ The deeper I get into this project, the more I am convinced of the fundamental e
 
 That being said, it's at least at the point where you can stroll around a simple collection of buildings, shooting utterly helpless and immobile bandits.  Doing so is a good lesson in how badly your performance is affected by your character's traits and negative modifiers for distance and motion.
 
+Deadlands Classic has rules for movie-style duels, high noon, middle of a dusty street, staring down your opponent and unsettling them enough for a quickdraw advantage. Currently, these are completely unimplemented in this project.
+
 ***
 
 ###### While not directly incorporated into the project, [REXpaint](https://www.gridsagegames.com/rexpaint/) and [Atom](https://atom.io/) nonetheless make my work easier.
