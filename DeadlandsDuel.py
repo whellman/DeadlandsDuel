@@ -26,7 +26,7 @@ def main():
     cardtable_height = screen_height
     cardtable_x = screen_width - cardtable_width
 
-    panel_height = 7
+    panel_height = 10
     panel_y = screen_height - panel_height
     panel_width = screen_width - cardtable_width
 
@@ -92,6 +92,7 @@ def main():
     active_card = posse_deck.deal(1) # pydealer.Stack()
 
     colt_army = {'shots': 6,
+                 'max_shots': 6,
                  'range': 10,
                  'damage': {'number_of_dice': 3, 'sideness_of_dice': 6}}
 
@@ -113,6 +114,8 @@ def main():
         shoot = action.get('shoot')
 
         pass_turn = action.get('pass_turn')
+
+        reload = action.get('reload')
 
         if pass_turn: # pass action would be more accurate, for how i have modified this since creating it
             if active_card.size == 0:
@@ -138,7 +141,19 @@ def main():
                     active_card.add(player_hand.deal(1, 'top'))
                     # player_hand.sort()
 
-        if shoot and (active_card.size > 0):
+        if reload and colt_army['shots'] == colt_army['max_shots']:
+            message_log.add_message(Message("Your revolver is fully loaded.", tcod.blue))
+        elif reload:
+            colt_army['shots'] += 1
+            message_log.add_message(Message("You load a bullet into your revolver.", tcod.green))
+            posse_discard.add(active_card.deal(active_card.size))
+            if player_hand.size == 0:
+                player_round_movement_budget = player_charactersheet.get_movement_budget()
+                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)            
+
+        if shoot and (active_card.size > 0) and (colt_army['shots'] == 0):
+            message_log.add_message(Message("You need to reload!", tcod.red))
+        elif shoot and (active_card.size > 0) and (colt_army['shots'] > 0):
             # Shoot is currently the only "real" action that uses up the active card.
             modifier = 0
             if move_this_action > ((player_charactersheet.pace * 3) // 5):
@@ -170,7 +185,9 @@ def main():
             success = shootin_roll.get('success')
             message_log.add_message(Message("BANG!!", tcod.brass))
 
-
+            colt_army['shots'] -= 1
+            if colt_army['shots'] == 0:
+                message_log.add_message(Message("That was your last loaded bullet!", tcod.red))
 
             if bust:
                 message_log.add_message(Message("You went bust, and narrowly avoided shooting your own foot!", tcod.red))

@@ -26,6 +26,9 @@ def handle_events():
             elif event.sym == tcod.event.K_n:
                 return {'move': (1, 1)}
 
+            elif event.sym == tcod.event.K_r:
+                return {'reload': 1}
+
             elif event.sym == tcod.event.K_RETURN:
                 return {'activate_card': -1}
             elif event.sym == tcod.event.K_f:
