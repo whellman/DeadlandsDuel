@@ -30,4 +30,6 @@ def handle_events():
                 return {'activate_card': -1}
             elif event.sym == tcod.event.K_f:
                 return {'shoot': 1}
+            elif event.sym == tcod.event.K_PERIOD:
+                return {'pass_turn': 1}
     return {}

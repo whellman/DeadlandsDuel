@@ -63,10 +63,10 @@ def render_cardtable(cardtable, player_hand, active_card, player_fate):
     startingshade = 255 - (stepamount * (player_hand.size - 1))
 
     for i in range(player_hand.size):
-        render_card(cardtable, player_hand[i], (3 + (2 * i)), 7, [(startingshade + (stepamount * i)), (startingshade + (stepamount * i)), (startingshade + (stepamount * i))])
+        render_card(cardtable, player_hand[i], (3 + (2 * i)), 10, [(startingshade + (stepamount * i)), (startingshade + (stepamount * i)), (startingshade + (stepamount * i))])
 
     if active_card.size > 0:
-        render_card(cardtable, active_card[0], 3, 3, [255, 255, 230])
+        render_card(cardtable, active_card[0], 3, 3, [255, 255, 200])
 
     chip_x = 3
     chip_y = cardtable.height - 2

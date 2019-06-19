@@ -92,6 +92,13 @@ def main():
 
         shoot = action.get('shoot')
 
+        pass_turn = action.get('pass_turn')
+
+        if pass_turn:
+            if player_hand.size == 0:
+                player_round_movement_budget = player_charactersheet.get_movement_budget()
+                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard)
+
         if activate_card and (active_card.size == 0):
             # if activate_card == 1:
             #     if player_hand.size < 5:
@@ -132,41 +139,8 @@ def main():
             posse_discard.add(active_card.deal(1))
 
             if player_hand.size == 0:
-                quickness_roll = skill_roll(player_charactersheet.quickness.traitDie, player_charactersheet.quickness.levelDice)
-                print('Beginning of new round. Rolling quickness...')
-
                 player_round_movement_budget = player_charactersheet.get_movement_budget()
-
-                bust = quickness_roll.get('bust')
-                failure = quickness_roll.get('failure')
-                success = quickness_roll.get('success')
-
-                if not bust:
-                    handsize = 1
-                    if success:
-                        print("You succeeded in quickly getting multiple action cards this round!")
-                        handsize += success
-                        if handsize > 5:
-                            handsize = 5
-                    else:
-                        print("You failed to get more than the default single action card this round.")
-                    newhand = pydealer.Stack()
-
-                    for i in range(handsize):
-                        if posse_deck.size == 0:
-                            print("reshuffling!")
-                            print(posse_deck.size)
-                            print(posse_discard.size)
-                            print(newhand.size)
-                            posse_deck.add(posse_discard.deal(posse_discard.size))
-                            posse_deck.shuffle()
-                        newcard = posse_deck.deal(1)
-                        newhand.add(newcard)
-
-                    player_hand.add(newhand)
-                    player_hand.sort()
-                else:
-                    print("You went bust, no new cards this round!")
+                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard)
 
         # FIXME: As currently written, this lets you move both before and after an action card.
         # First, the game lets you move a partial movement,
@@ -207,6 +181,43 @@ def main():
                             print("Walking...")
                         fov_recompute = True
 
+
+def roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard):
+    quickness_roll = skill_roll(player_charactersheet.quickness.traitDie, player_charactersheet.quickness.levelDice)
+    print('Beginning of new round. Rolling quickness...')
+
+
+
+    bust = quickness_roll.get('bust')
+    failure = quickness_roll.get('failure')
+    success = quickness_roll.get('success')
+
+    if not bust:
+        handsize = 1
+        if success:
+            print("You succeeded in quickly getting multiple action cards this round!")
+            handsize += success
+            if handsize > 5:
+                handsize = 5
+        else:
+            print("You failed to get more than the default single action card this round.")
+        newhand = pydealer.Stack()
+
+        for i in range(handsize):
+            if posse_deck.size == 0:
+                print("reshuffling!")
+                print(posse_deck.size)
+                print(posse_discard.size)
+                print(newhand.size)
+                posse_deck.add(posse_discard.deal(posse_discard.size))
+                posse_deck.shuffle()
+            newcard = posse_deck.deal(1)
+            newhand.add(newcard)
+
+        player_hand.add(newhand)
+        player_hand.sort()
+    else:
+        print("You went bust, no new cards this round!")
 
 
 if __name__ == '__main__':
