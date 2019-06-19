@@ -7,12 +7,16 @@ import pydealer
 from collections import Counter
 from random import sample
 
+
 from character import Character
-from diceroller import skill_roll
+from components.woundable import Woundable
+from death_functions import kill_monster
+from diceroller import skill_roll, ranged_weapon_damage_roll, unexploding_roll
 from entity import Entity, get_blocking_entities_at_location
 from input_handler import handle_events
+from game_messages import MessageLog, Message
 from map_objects.mapgine import generate_map
-from renderengine import render_all
+from renderengine import render_all, RenderOrder
 
 
 def main():
@@ -21,10 +25,21 @@ def main():
     cardtable_width = 18
     cardtable_height = screen_height
     cardtable_x = screen_width - cardtable_width
+
+    panel_height = 7
+    panel_y = screen_height - panel_height
+    panel_width = screen_width - cardtable_width
+
     map_width = screen_width - cardtable_width
-    map_height = screen_height
+    map_height = screen_height - panel_height
 
+    message_x = 2
+    message_width = panel_width - 2
+    message_height = panel_height - 1
 
+    message_log = MessageLog(message_x, message_width, message_height)
+
+    panel = tcod.console.Console(panel_width, panel_height)
     mapcon = tcod.console.Console(map_width, map_height)
     cardtable = tcod.console.Console(cardtable_width, cardtable_height)
 
@@ -32,7 +47,8 @@ def main():
     player_charactersheet = Character()
     print(player_charactersheet)
 
-    player = Entity(int(screen_width / 2), int(screen_height / 2), '@', tcod.white, 'Player', True)
+
+    player = Entity(int(screen_width / 2), int(screen_height / 2), '@', tcod.white, 'Player', True, RenderOrder.ACTOR, Woundable(6))
     entities = [player]
 
     game_map = tcod.map.Map(map_width, map_height)
@@ -75,12 +91,16 @@ def main():
 
     active_card = posse_deck.deal(1) # pydealer.Stack()
 
+    colt_army = {'shots': 6,
+                 'range': 10,
+                 'damage': {'number_of_dice': 3, 'sideness_of_dice': 6}}
+
     while True:
 
         if fov_recompute:
             game_map.compute_fov(player.x, player.y, algorithm=tcod.FOV_PERMISSIVE(5))
 
-        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate)
+        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log)
 
         tcod.console_flush()
 
@@ -94,23 +114,22 @@ def main():
 
         pass_turn = action.get('pass_turn')
 
-        if pass_turn:
-            if player_hand.size == 0:
+        if pass_turn: # pass action would be more accurate, for how i have modified this since creating it
+            if active_card.size == 0:
+                posse_discard.add(player_hand.deal(player_hand.size))
+
                 player_round_movement_budget = player_charactersheet.get_movement_budget()
-                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard)
+                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+
+            elif active_card.size > 0:
+                posse_discard.add(active_card.deal(active_card.size))
+                if player_hand.size == 0:
+                    posse_discard.add(player_hand.deal(player_hand.size))
+
+                    player_round_movement_budget = player_charactersheet.get_movement_budget()
+                    roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
 
         if activate_card and (active_card.size == 0):
-            # if activate_card == 1:
-            #     if player_hand.size < 5:
-            #         if posse_deck.size == 0:
-            #             print("reshuffling! posse_deck, posse_discard")
-            #             print(posse_deck.size)
-            #             print(posse_discard.size)
-            #             posse_deck.add(posse_discard.deal(posse_discard.size))
-            #             posse_deck.shuffle()
-            #         newcard = posse_deck.deal(1)
-            #         player_hand.add(newcard)
-            #         player_hand.sort()
 
             #nominate new active card. (test-only terminiology)
             if activate_card == -1:
@@ -121,26 +140,75 @@ def main():
 
         if shoot and (active_card.size > 0):
             # Shoot is currently the only "real" action that uses up the active card.
-            shootin_roll = skill_roll(player_charactersheet.shootin_pistol['trait'], player_charactersheet.shootin_pistol['aptitude'], tn=5)
+            modifier = 0
+            if move_this_action > ((player_charactersheet.pace * 3) // 5):
+                message_log.add_message(Message("You attempt to draw a bead while running...", tcod.orange))
+                modifier = -4
+            elif move_this_action > 0:
+                message_log.add_message(Message("You fire while walking...", tcod.yellow))
+                modifier = -2
+
+            nearest_target = None
+            nearest_distance = 999
+            for entity in entities:
+                if game_map.fov[entity.y, entity.x]:
+                    if entity.woundable:
+                        if not entity.name is 'Player':
+                            new_distance = entity.distance_to(player)
+                            if new_distance < nearest_distance:
+                                nearest_distance = new_distance
+                                nearest_target = entity
+            tn = 5
+
+            range_increments = (nearest_distance / 3) // colt_army['range']
+            tn += range_increments
+
+            shootin_roll = skill_roll(player_charactersheet.shootin_pistol['trait'], player_charactersheet.shootin_pistol['aptitude'], tn, modifier)
+
             bust = shootin_roll.get('bust')
             failure = shootin_roll.get('failure')
             success = shootin_roll.get('success')
-            print("BANG!!")
+            message_log.add_message(Message("BANG!!", tcod.brass))
+
+
+
             if bust:
-                print("You went bust, and narrowly avoided shooting your own foot!")
-            elif failure:
-                print("The bullet whizzes past your target!")
-            elif success:
-                if success == 1:
-                    print("You manage to hit your target!")
+                message_log.add_message(Message("You went bust, and narrowly avoided shooting your own foot!", tcod.red))
+            else:
+                if not nearest_target:
+                    if failure:
+                        message_log.add_message(Message("You shoot the broad side of a barn!"))
+                    elif success:
+                        if success == 1:
+                            message_log.add_message(Message("You shoot some bottles for target practice!", tcod.green))
+                        else:
+                            message_log.add_message(Message("You put a bullet hole in the forehead of a Wanted poster!", tcod.blue))
                 else:
-                    print("You accurately shoot your target!")
+                    if failure:
+                        message_log.add_message(Message("The bullet whizzes past your target!"))
+                    elif success:
+                        vital_hit = False
+                        hitlocation = unexploding_roll(20)
+                        if (hitlocation == 20) or (hitlocation == 10):
+                            vital_hit = True
+                        if success == 1:
+                            message_log.add_message(Message("You manage to hit your target!", tcod.green))
+                        else:
+                            if ((20 - hitlocation) <= success) or (0 < (10 - hitlocation) <= success) or (0 < (hitlocation - 10) <= success):
+                                vital_hit = True
+                            message_log.add_message(Message("You accurately shoot your target!", tcod.blue))
+
+                        dmg = ranged_weapon_damage_roll(colt_army['damage']['sideness_of_dice'], colt_army['damage']['number_of_dice'], vital_bonus = vital_hit)
+
+                        nearest_target.woundable.take_simple_damage(dmg)
+                        if nearest_target.woundable.get_most_severe_wound()[1] >= 5:
+                            message_log.add_message(kill_monster(nearest_target))
 
             posse_discard.add(active_card.deal(1))
 
             if player_hand.size == 0:
                 player_round_movement_budget = player_charactersheet.get_movement_budget()
-                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard)
+                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
 
         # FIXME: As currently written, this lets you move both before and after an action card.
         # First, the game lets you move a partial movement,
@@ -164,7 +232,7 @@ def main():
                     target = get_blocking_entities_at_location(entities, destination_x, destination_y)
 
                     if target:
-                        print('You kick the ' + target.name + ' in the shins, much to its annoyance!')
+                        message_log.add_message(Message('You kick the ' + target.name + ' in the shins, much to its annoyance!'))
                     else:
                         player.move(dx, dy)
                         player_round_movement_budget -= 1
@@ -176,15 +244,15 @@ def main():
                         move_this_action += 1
                         #                       pace in yards.         yds->ft   ft->squares
                         if move_this_action > ((player_charactersheet.pace * 3) // 5):
-                            print("Running!!!")
+                            message_log.add_message(Message("Running!!!", tcod.orange))
                         else:
-                            print("Walking...")
+                            message_log.add_message(Message("Walking...", tcod.yellow))
                         fov_recompute = True
 
 
-def roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard):
+def roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log):
     quickness_roll = skill_roll(player_charactersheet.quickness.traitDie, player_charactersheet.quickness.levelDice)
-    print('Beginning of new round. Rolling quickness...')
+    message_log.add_message(Message('Beginning of new round. Rolling quickness...'))
 
 
 
@@ -195,20 +263,17 @@ def roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard
     if not bust:
         handsize = 1
         if success:
-            print("You succeeded in quickly getting multiple action cards this round!")
+            message_log.add_message(Message("You succeeded in quickly getting multiple action cards this round!", tcod.green))
             handsize += success
             if handsize > 5:
                 handsize = 5
         else:
-            print("You failed to get more than the default single action card this round.")
+            message_log.add_message(Message("You failed to get more than the default single action card this round."))
         newhand = pydealer.Stack()
 
         for i in range(handsize):
             if posse_deck.size == 0:
-                print("reshuffling!")
-                print(posse_deck.size)
-                print(posse_discard.size)
-                print(newhand.size)
+                message_log.add_message(Message("Reshuffling!", tcod.gray))
                 posse_deck.add(posse_discard.deal(posse_discard.size))
                 posse_deck.shuffle()
             newcard = posse_deck.deal(1)
@@ -217,7 +282,7 @@ def roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard
         player_hand.add(newhand)
         player_hand.sort()
     else:
-        print("You went bust, no new cards this round!")
+        message_log.add_message(Message("You went bust, no new cards this round!", tcod.red))
 
 
 if __name__ == '__main__':

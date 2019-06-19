@@ -3,6 +3,14 @@ import pydealer
 
 from rgb import rgb
 
+from enum import Enum
+
+
+class RenderOrder(Enum):
+    CORPSE = 1
+    ITEM = 2
+    ACTOR = 3
+
 def render_map(mapcon, game_map):
     for y in range(mapcon.height):
         for x in range(mapcon.width):
@@ -76,13 +84,27 @@ def render_cardtable(cardtable, player_hand, active_card, player_fate):
         chip_x += 3
 
 
-def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate):
+def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log):
     render_cardtable(cardtable, player_hand, active_card, player_fate)
     cardtable.blit(root_console, cardtable_x, 0, 0, 0, cardtable.width, cardtable.height)
     render_map(mapcon, game_map)
-    for entity in entities:
+
+    entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
+
+    for entity in entities_in_render_order:
         if game_map.fov[entity.y, entity.x]:
             draw_entity(entity, mapcon)
+
+    panel.clear(fg=rgb(255, 255, 255), bg=rgb(0, 0, 0))
+
+    y = 1
+    for message in message_log.messages:
+        # libtcod.console_set_default_foreground(panel, message.color)
+        panel.print(message_log.x, y, message.text, fg=message.color, alignment=tcod.LEFT)
+        y += 1
+
+    panel.blit(root_console, 0, panel_y, 0, 0, panel.width, panel.height)
+
     mapcon.blit(root_console, 0, 0, 0, 0, mapcon.width, mapcon.height)
 
 def draw_entity(entity, con):

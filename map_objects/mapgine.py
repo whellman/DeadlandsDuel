@@ -2,7 +2,10 @@ import tcod
 import tcod.bsp
 import random
 
+from components.woundable import Woundable
 from entity import Entity
+from renderengine import RenderOrder
+
 
 def generate_map(game_map, player, entities):
 
@@ -62,6 +65,6 @@ def generate_map(game_map, player, entities):
                 player.y = (node.y + 2) + ((node.height - 3)//2)
             else:
                 # We'll put one enemy in each other room.
-                bandit = Entity((node.x + 2) + ((node.width - 4)//2), (node.y + 2) + ((node.height - 3)//2), 'b', tcod.black, 'Bandit', True)
+                bandit = Entity((node.x + 2) + ((node.width - 4)//2), (node.y + 2) + ((node.height - 3)//2), 'b', tcod.black, 'Bandit', True, RenderOrder.ACTOR, Woundable(6))
                 entities.append(bandit)
             num_rooms += 1
