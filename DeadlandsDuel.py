@@ -6,6 +6,7 @@ import pydealer
 from collections import Counter
 from random import sample
 
+from charactergen import Character
 from diceroller import skill_roll
 from entity import Entity, get_blocking_entities_at_location
 from input_handler import handle_events

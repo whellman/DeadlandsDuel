@@ -22,6 +22,13 @@ class Character:
         self.smarts = traits['smarts']
         self.spirit = traits['spirit']
 
+        self.grit = 0
+        self.pace = nimbleness.traitDie
+        self.size = 6
+        self.wind = vigor.traitDie + spirit.traitDie
+
+        self.aptitudePoints = self.cognition.traitDie + self.knowledge.traitDie + self.smarts.traitDie
+
 def character_generator():
 
     mapping = {'Ace': 12,
