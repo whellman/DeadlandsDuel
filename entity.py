@@ -20,6 +20,7 @@ class Entity:
         if self.fighter:
             self.fighter.owner = self
 
+
     def move(self, dx, dy):
         # Move the entity by a given amount
         self.x += dx

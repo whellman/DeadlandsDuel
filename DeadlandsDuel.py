@@ -99,6 +99,10 @@ def main():
 
     game_state = GameStates.PLAYERS_TURN
 
+    # FIXME: There's probably an elegant solution to be found in generalizing this
+    # list to include the player, and sorting it by action cards, or something.
+    enemy_combatants = []
+
     while True:
 
         if fov_recompute:
@@ -107,14 +111,7 @@ def main():
             if game_state ==GameStates.PLAYERS_TURN:
                 for entity in entities:
                     if entity.name == 'Bandit' and game_map.fov[entity.y, entity.x]:
-                        game_state = GameStates.BEGIN_DETAILED_COMBAT_ROUNDS
-                        # FIXME: We should deal hands to the baddies (at least in FOV?? or in an
-                        # awareness radius??????) and then proceed in card order. But for now,
-                        # we will just skip right to the players turn.
-                        game_state = GameStates.ROUNDS_PLAYERS_ACTION
-                        player_round_movement_budget = player_charactersheet.get_movement_budget()
-                        roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
-                        message_log.add_message(Message("You see a bandit! Beginning combat rounds!"))
+                        game_state = GameStates.BEGIN_DETAILED_COMBAT_ROUND
                         break
 
             if game_state ==GameStates.ROUNDS_PLAYERS_ACTION:
@@ -127,11 +124,82 @@ def main():
                     posse_discard.add(active_card.deal(active_card.size))
                     posse_discard.add(player_hand.deal(player_hand.size))
                     game_state =GameStates.PLAYERS_TURN
+                    enemy_combatants = []
 
         if game_state == GameStates.ENEMY_TURN:
             print(game_state)
             game_state = GameStates.PLAYERS_TURN
             print(game_state)
+
+        if game_state == GameStates.BEGIN_DETAILED_COMBAT_ROUND:
+            # Let the player know what's going on
+            message_log.add_message(Message("You see a bandit! Beginning combat rounds!"))
+
+            # Deal the player a hand from the posse deck and calc their movement
+            player_round_movement_budget = player_charactersheet.get_movement_budget()
+            roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+
+            # We *should* deal the enemies an action hand, and calc their movement.
+            # FIXME: Currently, we use the ultra-simple shortcut for enemies
+            # from the Marshal Tricks section of the rules, dealing them a single card.
+            # This combat really isn't on a scale where that is justified, at least not until
+            # more enemies are clued in to the combat via sound or a vague awareness metric.
+            # Also, enemy movement is not yet implemented, so we don't calc their move rate.
+            for entity in entities:
+                if entity.name == 'Bandit' and game_map.fov[entity.y, entity.x]:
+                    entity.fighter.action_hand = marshal_deck.deal(1)
+                    enemy_combatants.append(entity)
+
+            game_state = GameStates.MEDIATE_COMBAT_ROUNDS
+
+        if game_state == GameStates.MEDIATE_COMBAT_ROUNDS:
+            # FIXME: Should we keep track of a list of combat activated enemies?
+            # As a quick hack, right now it's just FOV.
+            # (calculated in BEGIN_DETAILED_COMBAT_ROUNDS conditional above)
+            remaining_enemy_cards = False
+            for combatant in enemy_combatants:
+                if combatant.fighter.action_hand.size > 0:
+                    print(combatant.fighter.action_hand.size)
+                    remaining_enemy_cards = True
+
+            if remaining_enemy_cards or (player_hand.size > 0): # and (active_card.size > 0)):
+
+                highest_player = None
+                if player_hand.size > 0:
+                    highest_player = player_hand[player_hand.size - 1]
+                print("highest player card " + str(highest_player))
+
+                highest_combatant = None
+                highest_comb_card = None
+                for combatant in enemy_combatants:
+                    print("combatant card: " + str(combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]))
+                    if highest_comb_card == None:
+                        highest_combatant = combatant
+                        highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
+                    elif combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1] > highest_comb_card:
+                        highest_combatant = combatant
+                        highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
+
+                print("highest combatant card " + str(highest_comb_card))
+
+                if (highest_combatant) and ((highest_player == None) or (highest_comb_card > highest_player)):
+                    # Enemy turn, in combat rounds. Placeholder.
+                    message_log.add_message(Message("The " + highest_combatant.name + " acts on a " + str(highest_comb_card) + "!", tcod.orange))
+                    message_log.add_message(Message("The bandit takes aim and shoots! The bullet whizzes past you!", tcod.red))
+                    marshal_discard.add(highest_combatant.fighter.action_hand.deal(1))
+                    enemy_combatants.remove(highest_combatant)
+                else:
+                    # FIXME: This erroneously includes tied situations, which the rules say
+                    # should result in simultaneous actions.
+
+                    # Player's turn, in combat rounds.
+                    game_state = GameStates.ROUNDS_PLAYERS_ACTION
+            else:
+                game_state = GameStates.BEGIN_DETAILED_COMBAT_ROUND
+
+        if game_state == GameStates.ROUNDS_ENEMY_ACTION:
+            print("Shouldn't be possible???")
+
 
         render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log)
 
@@ -166,19 +234,22 @@ def main():
 
 
         if pass_turn and (game_state == GameStates.ROUNDS_PLAYERS_ACTION): # pass action would be more accurate, for how i have modified this since creating it
-            if active_card.size == 0:
-                posse_discard.add(player_hand.deal(player_hand.size))
-
-                player_round_movement_budget = player_charactersheet.get_movement_budget()
-                roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
-
-            elif active_card.size > 0:
+            # if active_card.size == 0:
+            #     posse_discard.add(player_hand.deal(player_hand.size))
+            #
+            #     player_round_movement_budget = player_charactersheet.get_movement_budget()
+            #     roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+            #elif
+            if active_card.size > 0:
                 posse_discard.add(active_card.deal(active_card.size))
-                if player_hand.size == 0:
-                    posse_discard.add(player_hand.deal(player_hand.size))
+                game_state = GameStates.MEDIATE_COMBAT_ROUNDS
+                # The following should be covered by the MEDIATE_COMBAT_ROUNDS
 
-                    player_round_movement_budget = player_charactersheet.get_movement_budget()
-                    roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+                # if player_hand.size == 0:
+                #     posse_discard.add(player_hand.deal(player_hand.size))
+                #
+                #     player_round_movement_budget = player_charactersheet.get_movement_budget()
+                #     roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
 
         if activate_card and (active_card.size == 0) and (game_state == GameStates.ROUNDS_PLAYERS_ACTION):
 
@@ -197,9 +268,10 @@ def main():
                 message_log.add_message(Message("You load a bullet into your revolver.", tcod.green))
                 if (game_state ==GameStates.ROUNDS_PLAYERS_ACTION):
                     posse_discard.add(active_card.deal(active_card.size))
-                    if player_hand.size == 0:
-                        player_round_movement_budget = player_charactersheet.get_movement_budget()
-                        roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+                    game_state = GameStates.MEDIATE_COMBAT_ROUNDS
+                    # if player_hand.size == 0:
+                    #     player_round_movement_budget = player_charactersheet.get_movement_budget()
+                    #     roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
 
         if shoot and (game_state == GameStates.ROUNDS_PLAYERS_ACTION):
             if (active_card.size > 0) and (colt_army['shots'] == 0):
@@ -218,7 +290,7 @@ def main():
                 nearest_distance = 999
                 for entity in entities:
                     if game_map.fov[entity.y, entity.x]:
-                        if entity.woundable:
+                        if entity.fighter:
                             if not entity.name is 'Player':
                                 new_distance = entity.distance_to(player)
                                 if new_distance < nearest_distance:
@@ -268,15 +340,16 @@ def main():
 
                             dmg = ranged_weapon_damage_roll(colt_army['damage']['sideness_of_dice'], colt_army['damage']['number_of_dice'], vital_bonus = vital_hit)
 
-                            message_log.add_message(nearest_target.woundable.take_simple_damage(dmg))
-                            if nearest_target.woundable.get_most_severe_wound()[1] >= 5:
+                            message_log.add_message(nearest_target.fighter.take_simple_damage(dmg))
+                            if nearest_target.fighter.get_most_severe_wound()[1] >= 5:
                                 message_log.add_message(kill_monster(nearest_target))
 
                 posse_discard.add(active_card.deal(1))
 
-                if player_hand.size == 0:
-                    player_round_movement_budget = player_charactersheet.get_movement_budget()
-                    roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
+                game_state = GameStates.MEDIATE_COMBAT_ROUNDS
+                # if player_hand.size == 0:
+                #     player_round_movement_budget = player_charactersheet.get_movement_budget()
+                #     roll_new_round(player_hand, player_charactersheet, posse_deck, posse_discard, message_log)
 
         # FIXME: As currently written, this lets you move both before and after an action card.
         # First, the game lets you move a partial movement,

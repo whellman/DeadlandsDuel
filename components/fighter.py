@@ -2,7 +2,7 @@ import rgb
 from game_messages import Message
 
 class Fighter:
-    def __init__(self, size, heavy_armor=None, light_armor=None):
+    def __init__(self, size, heavy_armor=None, light_armor=None, action_hand=None):
         self.size = size
         self.heavy_armor = heavy_armor
         self.light_armor = light_armor
@@ -12,6 +12,10 @@ class Fighter:
                             'left_arm': 0,
                             'right_leg': 0,
                             'left_leg': 0}
+
+        self.action_hand = action_hand
+        if self.action_hand:
+            self.action_hand.owner = self 
 
     def reduce_damage_dice(self, num, sides):
         if not self.heavy_armor:

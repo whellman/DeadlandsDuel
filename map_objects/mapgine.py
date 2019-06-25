@@ -2,6 +2,8 @@ import tcod
 import tcod.bsp
 import random
 
+from pydealer import Stack
+
 from components.fighter import Fighter
 from entity import Entity
 from map_objects.rectangle import Rect
@@ -71,7 +73,7 @@ def generate_map(game_map, player, entities):
                 player.y = new_y
             else:
                 # We'll put one enemy in each other room.
-                bandit = Entity(new_x, new_y, 'b', tcod.black, 'Bandit', True, RenderOrder.ACTOR, Fighter(6))
+                bandit = Entity(new_x, new_y, 'b', tcod.black, 'Bandit', True, RenderOrder.ACTOR, Fighter(6, action_hand=Stack()))
                 entities.append(bandit)
             rooms.append(new_room)
             num_rooms += 1
