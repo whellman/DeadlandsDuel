@@ -10,3 +10,5 @@ class GameStates(Enum):
     BEGIN_DETAILED_COMBAT_ROUND = auto()
 
     MEDIATE_COMBAT_ROUNDS = auto()
+
+    PLAYER_DEAD = auto()

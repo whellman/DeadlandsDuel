@@ -133,7 +133,7 @@ def main():
 
         if game_state == GameStates.BEGIN_DETAILED_COMBAT_ROUND:
             # Let the player know what's going on
-            message_log.add_message(Message("You see a bandit! Beginning combat rounds!"))
+            message_log.add_message(Message("Beginning of combat round!"))
 
             # Deal the player a hand from the posse deck and calc their movement
             player_round_movement_budget = player_charactersheet.get_movement_budget()
@@ -185,7 +185,54 @@ def main():
                 if (highest_combatant) and ((highest_player == None) or (highest_comb_card > highest_player)):
                     # Enemy turn, in combat rounds. Placeholder.
                     message_log.add_message(Message("The " + highest_combatant.name + " acts on a " + str(highest_comb_card) + "!", tcod.orange))
-                    message_log.add_message(Message("The bandit takes aim and shoots! The bullet whizzes past you!", tcod.red))
+                    if highest_combatant.fighter.shots > 0:
+                        tn = 5
+                        modifier = 0 - highest_combatant.fighter.get_most_severe_wound()[1]
+                        range_increments = (highest_combatant.distance_to(player) / 3) // colt_army['range']
+                        tn += range_increments
+
+                        shootin_roll = skill_roll(2, 8, tn, modifier)
+                        success = shootin_roll.get('success')
+                        if success:
+                            vital_hit = False
+                            body_part = None
+                            hitlocation = unexploding_roll(20)
+                            if (hitlocation == 20):
+                                vital_hit = True
+                                body_part = 'head'
+                            elif 15 <= hitlocation <= 19:
+                                body_part = 'guts' #upper
+                            elif 11 <= hitlocation <= 14:
+                                body_part = '_arm'
+                                if unexploding_roll(2) == 1:
+                                    body_part = 'left' + body_part
+                                else:
+                                    body_part = 'right' + body_part
+                            elif hitlocation == 10:
+                                vital_hit = True
+                                body_part = 'guts' #gizzards
+                            elif 5 <= hitlocation <= 9:
+                                body_part = 'guts' #lower
+                            else:
+                                body_part = '_leg'
+                                if unexploding_roll(2) == 1:
+                                    body_part = 'left' + body_part
+                                else:
+                                    body_part = 'right' + body_part
+
+
+                            message_log.add_message(Message("The bandit takes aim and shoots, hitting you in the " + body_part + "!", tcod.red))
+                            dmg = ranged_weapon_damage_roll(colt_army['damage']['sideness_of_dice'], colt_army['damage']['number_of_dice'], vital_bonus = vital_hit)
+                            message_log.add_message(player.fighter.take_positional_damage(dmg, body_part))
+                            if (player.fighter.body_wounds['guts'] >= 5) or (player.fighter.body_wounds['head'] >= 5):
+                                message_log.add_message(kill_monster(player))
+                                game_state = GameStates.PLAYER_DEAD
+                        else:
+                            message_log.add_message(Message("The bandit takes aim and shoots! The bullet whizzes past you!", tcod.orange))
+                        highest_combatant.fighter.shots -= 1
+                    else:
+                        message_log.add_message(Message("The bandit loads his revolver..."))
+                        highest_combatant.fighter.shots += 1
                     marshal_discard.add(highest_combatant.fighter.action_hand.deal(1))
                     enemy_combatants.remove(highest_combatant)
                 else:
@@ -201,7 +248,7 @@ def main():
             print("Shouldn't be possible???")
 
 
-        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log)
+        render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log, player.fighter.body_wounds)
 
         tcod.console_flush()
 
@@ -286,6 +333,9 @@ def main():
                     message_log.add_message(Message("You fire while walking...", tcod.yellow))
                     modifier = -2
 
+                wound_modifier = 0 - player.fighter.get_most_severe_wound()[1]
+                modifier += wound_modifier
+
                 nearest_target = None
                 nearest_distance = 999
                 for entity in entities:
@@ -343,6 +393,7 @@ def main():
                             message_log.add_message(nearest_target.fighter.take_simple_damage(dmg))
                             if nearest_target.fighter.get_most_severe_wound()[1] >= 5:
                                 message_log.add_message(kill_monster(nearest_target))
+                                marshal_discard.add(nearest_target.fighter.action_hand.deal(nearest_target.fighter.action_hand.size))
 
                 posse_discard.add(active_card.deal(1))
 

@@ -2,7 +2,7 @@ import rgb
 from game_messages import Message
 
 class Fighter:
-    def __init__(self, size, heavy_armor=None, light_armor=None, action_hand=None):
+    def __init__(self, size, heavy_armor=None, light_armor=None, action_hand=None, shots=6):
         self.size = size
         self.heavy_armor = heavy_armor
         self.light_armor = light_armor
@@ -12,10 +12,11 @@ class Fighter:
                             'left_arm': 0,
                             'right_leg': 0,
                             'left_leg': 0}
+        self.shots=shots
 
         self.action_hand = action_hand
         if self.action_hand:
-            self.action_hand.owner = self 
+            self.action_hand.owner = self
 
     def reduce_damage_dice(self, num, sides):
         if not self.heavy_armor:
@@ -52,7 +53,7 @@ class Fighter:
             damage += self.light_armor
         wounds_total = damage // self.size
         self.body_wounds[location] += wounds_total
-        return Message(self.owner.name + " hit for " + str(damage) + " causing " + str(wounds_total) + " wounds!")#, rgb(255, 200, 0))
+        return Message(self.owner.name + " was hit for " + str(damage) + " causing " + str(wounds_total) + " wounds!")#, rgb(255, 200, 0))
 
     def take_simple_damage(self, damage):
         return self.take_positional_damage(damage, 'guts')

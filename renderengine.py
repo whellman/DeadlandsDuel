@@ -61,8 +61,55 @@ def render_card(cardtable, card, x, y, bgcolor):
         cardtable.print(x, y, card.value[0], fg=fgcolor)
         cardtable.print(x + 2, y + 4, card.value[0], fg=fgcolor)
 
+def render_player_wounds(cardtable, x, y, body_wounds):
+    #       xx
+    #       ++
+    #      x12
+    #
+    #   y  .☻.
+    # y+1  ▀█▀
+    # y+2  ▐.▌
+    print(body_wounds)
+    color_mapping = {0: tcod.white,
+                     1: tcod.light_blue,
+                     2: tcod.yellow,
+                     3: tcod.orange,
+                     4: tcod.red,
+                     5: tcod.black}
 
-def render_cardtable(cardtable, player_hand, active_card, player_fate):
+    # head
+    wound_amount = body_wounds['head']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x + 1, y, '☻', fg=color_mapping[wound_amount])
+    # right arm
+    wound_amount = body_wounds['right_arm']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x, y + 1, '▀', fg=color_mapping[wound_amount])
+    # left arm
+    wound_amount = body_wounds['left_arm']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x + 2, y + 1, '▀', fg=color_mapping[wound_amount])
+    # guts
+    wound_amount = body_wounds['guts']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x + 1, y + 1, '█', fg=color_mapping[wound_amount])
+    # right leg
+    wound_amount = body_wounds['right_leg']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x, y + 2, '▐', fg=color_mapping[wound_amount])
+    # left leg
+    wound_amount = body_wounds['left_leg']
+    if wound_amount > 5:
+        wound_amount = 5
+    cardtable.print(x + 2, y + 2, '▌', fg=color_mapping[wound_amount])
+
+
+def render_cardtable(cardtable, player_hand, active_card, player_fate, body_wounds):
     cardtable.draw_rect(0, 0, cardtable.width, cardtable.height, ch=20, bg=rgb(70, 140, 0))
     cardtable.draw_rect(1, 1, cardtable.width-2, cardtable.height-2, ch=20, bg=rgb(30, 60, 0))
     cardtable.draw_rect(2, 2, cardtable.width-3, cardtable.height-3, ch=20, bg=rgb(50, 100, 0))
@@ -83,9 +130,11 @@ def render_cardtable(cardtable, player_hand, active_card, player_fate):
             render_chip(cardtable, color, chip_x, (chip_y - i))
         chip_x += 3
 
+    render_player_wounds(cardtable, cardtable.width - 7, cardtable.height - 10, body_wounds)
 
-def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log):
-    render_cardtable(cardtable, player_hand, active_card, player_fate)
+
+def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log, body_wounds):
+    render_cardtable(cardtable, player_hand, active_card, player_fate, body_wounds)
     cardtable.blit(root_console, cardtable_x, 0, 0, 0, cardtable.width, cardtable.height)
     render_map(mapcon, game_map)
 
