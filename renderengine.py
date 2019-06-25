@@ -130,7 +130,7 @@ def render_cardtable(cardtable, player_hand, active_card, player_fate, body_woun
             render_chip(cardtable, color, chip_x, (chip_y - i))
         chip_x += 3
 
-    render_player_wounds(cardtable, cardtable.width - 7, cardtable.height - 10, body_wounds)
+    render_player_wounds(cardtable, cardtable.width - 6, cardtable.height - 12, body_wounds)
 
 
 def render_all(root_console, entities, mapcon, game_map, cardtable, cardtable_x, player_hand, active_card, player_fate, panel, panel_y, message_log, body_wounds):
