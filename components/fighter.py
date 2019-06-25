@@ -1,4 +1,7 @@
-class Woundable:
+import rgb
+from game_messages import Message
+
+class Fighter:
     def __init__(self, size, heavy_armor=None, light_armor=None):
         self.size = size
         self.heavy_armor = heavy_armor
@@ -45,6 +48,7 @@ class Woundable:
             damage += self.light_armor
         wounds_total = damage // self.size
         self.body_wounds[location] += wounds_total
+        return Message(self.owner.name + " hit for " + str(damage) + " causing " + str(wounds_total) + " wounds!")#, rgb(255, 200, 0))
 
     def take_simple_damage(self, damage):
-        self.take_positional_damage(damage, 'guts')
+        return self.take_positional_damage(damage, 'guts')

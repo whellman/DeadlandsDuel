@@ -2,9 +2,11 @@ import tcod
 import tcod.bsp
 import random
 
-from components.woundable import Woundable
+from components.fighter import Fighter
 from entity import Entity
+from map_objects.rectangle import Rect
 from renderengine import RenderOrder
+
 
 
 def generate_map(game_map, player, entities):
@@ -24,6 +26,7 @@ def generate_map(game_map, player, entities):
         max_vertical_ratio=1.5,
     )
 
+    rooms = []
     num_rooms = 0
 
     # In pre order, leaf nodes are visited before the nodes that connect them.
@@ -33,6 +36,9 @@ def generate_map(game_map, player, entities):
             # print('Connect the rooms:\n%s\n%s' % (node1, node2))
         else:
             # print('Dig a room for %s.' % node)
+
+            new_room = Rect(node.x, node.y, node.width, node.height)
+            (new_x, new_y) = new_room.center()
 
             game_map.walkable[(node.y + 2), (node.x + 2) : (node.x + 2) + (node.width - 3)] = False # changing x, origin y
             game_map.walkable[(node.y + 2) + (node.height - 3), (node.x + 2) : (node.x + 2) + (node.width - 3)] = False # changing x, end y
@@ -61,10 +67,11 @@ def generate_map(game_map, player, entities):
                     game_map.transparent[((node.y + 2) + ((node.height - 3)//2)), ((node.x + 2) + (node.width - 4))] = True
             if num_rooms == 0:
                 # We'll put the player in the first room we make.
-                player.x = (node.x + 2) + ((node.width - 4)//2)
-                player.y = (node.y + 2) + ((node.height - 3)//2)
+                player.x = new_x
+                player.y = new_y
             else:
                 # We'll put one enemy in each other room.
-                bandit = Entity((node.x + 2) + ((node.width - 4)//2), (node.y + 2) + ((node.height - 3)//2), 'b', tcod.black, 'Bandit', True, RenderOrder.ACTOR, Woundable(6))
+                bandit = Entity(new_x, new_y, 'b', tcod.black, 'Bandit', True, RenderOrder.ACTOR, Fighter(6))
                 entities.append(bandit)
+            rooms.append(new_room)
             num_rooms += 1

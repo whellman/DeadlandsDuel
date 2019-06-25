@@ -6,7 +6,7 @@ class Entity:
     """
     A generic object to represent players, enemies, items, etc.
     """
-    def __init__(self, x, y, char, color, name, blocks=False, render_order=RenderOrder.CORPSE, woundable=None):
+    def __init__(self, x, y, char, color, name, blocks=False, render_order=RenderOrder.CORPSE, fighter=None):
         self.x = x
         self.y = y
         self.char = char
@@ -15,10 +15,10 @@ class Entity:
         self.blocks = blocks
         self.render_order = render_order
 
-        self.woundable = woundable
+        self.fighter = fighter
 
-        if self.woundable:
-            self.woundable.owner = self
+        if self.fighter:
+            self.fighter.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
