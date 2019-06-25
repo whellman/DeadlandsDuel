@@ -10,7 +10,7 @@ This mostly-personal project is an attempt to learn about [the Deadlands Classic
 
 The deeper I get into this project, the more I am convinced of the fundamental error of trying to make a beginner-dev roguelike out of a system like Deadlands Classic, where much of the appeal is the mechanical choices and multiple paths at every step of play, e.g. the use of zero, one, or several "fate chips" to radically alter the result of a dice roll, after the fact and piecemeal. (Fate chips are implemented only in display, not in function.)
 
-That being said, it's at least at the point where you can stroll around a simple collection of buildings, shooting utterly helpless and immobile bandits.  Doing so is a good lesson in how badly your performance is affected by your character's traits and negative modifiers for distance and motion.
+That being said, it's at least at the point where you can stroll around a simple collection of buildings, exchanging gunfire with immobile bandits.  Doing so is a good lesson in how badly your performance is affected by your character's traits and negative modifiers for distance and motion.  It's a bit prone to crashing if you do smart things like run away from multiple bandits, though.
 
 Deadlands Classic has rules for movie-style duels, high noon, middle of a dusty street, staring down your opponent and unsettling them enough for a quickdraw advantage. Currently, these are completely unimplemented in this project.
 
