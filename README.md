@@ -2,8 +2,6 @@
 # Deadlands Duel
 ## A roguelike, sort of, in very early stages
 ![Screenshot](img/screenshot.png)
-###### I quite like the look of the 'card table' area, at least.
-
 ***
 
 This mostly-personal project is an attempt to learn about [the Deadlands Classic TTRPG](https://www.peginc.com/store/deadlands-classic-20th-anniversary-edition/) and [the Python port of libtcod](https://github.com/libtcod/python-tcod) by smashing the two together, repeatedly and stubbornly.
