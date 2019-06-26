@@ -1,12 +1,10 @@
 import tcod
 import tcod.event
 
-
 import pydealer
 
 from collections import Counter
 from random import sample
-
 
 from character import Character
 from components.fighter import Fighter
@@ -18,7 +16,6 @@ from game_messages import MessageLog, Message
 from game_states import GameStates
 from map_objects.mapgine import generate_map
 from renderengine import render_all, RenderOrder
-
 
 def main():
     screen_width = 80
@@ -127,9 +124,14 @@ def main():
                     enemy_combatants = []
 
         if game_state == GameStates.ENEMY_TURN:
-            print(game_state)
+            for entity in entities:
+                if (entity.name == 'Bandit') and (not game_map.fov[entity.y, entity.x]):
+                    if entity.fighter.shots < 6:
+                        # When the player ducks behind a wall to reload their revolver,
+                        # the bandits also take advantage of the opportunity!
+                        entity.fighter.shots += 1
             game_state = GameStates.PLAYERS_TURN
-            print(game_state)
+
 
         if game_state == GameStates.BEGIN_DETAILED_COMBAT_ROUND:
             # Let the player know what's going on
@@ -159,7 +161,7 @@ def main():
             remaining_enemy_cards = False
             for combatant in enemy_combatants:
                 if combatant.fighter.action_hand.size > 0:
-                    print(combatant.fighter.action_hand.size)
+                    # print(combatant.fighter.action_hand.size)
                     remaining_enemy_cards = True
 
             if remaining_enemy_cards or (player_hand.size > 0): # and (active_card.size > 0)):
@@ -167,22 +169,23 @@ def main():
                 highest_player = None
                 if player_hand.size > 0:
                     highest_player = player_hand[player_hand.size - 1]
-                print("highest player card " + str(highest_player))
+                # print("highest player card " + str(highest_player))
 
                 highest_combatant = None
                 highest_comb_card = None
-                for combatant in enemy_combatants:
-                    print("combatant card: " + str(combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]))
-                    if highest_comb_card == None:
-                        highest_combatant = combatant
-                        highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
-                    elif combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1] > highest_comb_card:
-                        highest_combatant = combatant
-                        highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
+                if remaining_enemy_cards:
+                    for combatant in enemy_combatants:
+                        print("combatant card: " + str(combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]))
+                        if highest_comb_card == None:
+                            highest_combatant = combatant
+                            highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
+                        elif combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1] > highest_comb_card:
+                            highest_combatant = combatant
+                            highest_comb_card =  combatant.fighter.action_hand[combatant.fighter.action_hand.size - 1]
 
-                print("highest combatant card " + str(highest_comb_card))
+                # print("highest combatant card " + str(highest_comb_card))
 
-                if (highest_combatant) and ((highest_player == None) or (highest_comb_card > highest_player)):
+                if remaining_enemy_cards and ((highest_combatant) and ((highest_player == None)) or (highest_comb_card > highest_player)):
                     # Enemy turn, in combat rounds. Placeholder.
                     message_log.add_message(Message("The " + highest_combatant.name + " acts on a " + str(highest_comb_card) + "!", tcod.orange))
                     if highest_combatant.fighter.shots > 0:

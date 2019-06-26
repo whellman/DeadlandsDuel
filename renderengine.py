@@ -69,7 +69,6 @@ def render_player_wounds(cardtable, x, y, body_wounds):
     #   y  .☻.
     # y+1  ▀█▀
     # y+2  ▐.▌
-    print(body_wounds)
     color_mapping = {0: tcod.white,
                      1: tcod.light_blue,
                      2: tcod.yellow,
