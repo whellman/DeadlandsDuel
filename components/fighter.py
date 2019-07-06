@@ -48,12 +48,29 @@ class Fighter:
                 most_injured_part = location
         return (most_injured_part, highest_number_wounds)
 
-    def take_positional_damage(self, damage, location):
+    def take_positional_damage(self, damage, location, fate_pot=None, player_fate=None):
         if self.light_armor:
             damage += self.light_armor
         wounds_total = damage // self.size
+
+        fate_message = ""
+
+        if(player_fate is not None and fate_pot is not None):
+            if wounds_total >= 3 and player_fate['blue'] > 0:
+                fate_message = "After spending 1 blue fate chip, "
+                wounds_total -= 3
+                player_fate['blue'] -= 1
+            elif wounds_total >= 2 and player_fate['red'] > 0:
+                fate_message = "After spending 1 red fate chip, "
+                wounds_total -= 2
+                player_fate['red'] -= 1
+            elif wounds_total >= 1 and player_fate['white'] > 0:
+                fate_message = "After spending 1 white fate chip, "
+                wounds_total -= 1
+                player_fate['white'] -= 1
+
         self.body_wounds[location] += wounds_total
-        return Message(self.owner.name + " was hit for " + str(damage) + " causing " + str(wounds_total) + " wounds!")#, rgb(255, 200, 0))
+        return Message(fate_message + self.owner.name + " was hit for " + str(damage) + " causing " + str(wounds_total) + " wounds!")#, rgb(255, 200, 0))
 
     def take_simple_damage(self, damage):
         return self.take_positional_damage(damage, 'guts')

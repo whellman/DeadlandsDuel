@@ -67,6 +67,9 @@ def main():
     #        use jokers, but its use of jokers does not differentiate between
     #        red and black jokers (as required in Deadlands) so the issue of
     #        jokers is left to another day.
+
+    # Also probably the suit hierarchy is not the same as Deadlands; that should be easy
+    # to fix when I get to it.
     marshal_deck = pydealer.Deck()
     posse_deck = pydealer.Deck()
 
@@ -226,7 +229,7 @@ def main():
 
                             message_log.add_message(Message("The bandit takes aim and shoots, hitting you in the " + body_part + "!", tcod.red))
                             dmg = ranged_weapon_damage_roll(colt_army['damage']['sideness_of_dice'], colt_army['damage']['number_of_dice'], vital_bonus = vital_hit)
-                            message_log.add_message(player.fighter.take_positional_damage(dmg, body_part))
+                            message_log.add_message(player.fighter.take_positional_damage(dmg, body_part, fate_pot, player_fate))
                             if (player.fighter.body_wounds['guts'] >= 5) or (player.fighter.body_wounds['head'] >= 5):
                                 message_log.add_message(kill_monster(player))
                                 game_state = GameStates.PLAYER_DEAD
